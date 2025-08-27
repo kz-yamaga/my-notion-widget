@@ -87,9 +87,7 @@
 
     // 正しく改行を扱うためのユーティリティ（必要なら使用）
     function lineCountByNewline(str){
-      return str.length === 0 ? 1 : str.split(/
-/).length; // 
- の正規表現はエスケープ必須
+      return str.length === 0 ? 1 : str.split(/\n/).length;
     }
 
     // 入力イベント
