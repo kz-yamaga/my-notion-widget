@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Char Counter Mini</title>
+  <style>
+    :root{
+      --bg: transparent; /* Notion埋め込みで自然になじむ */
+      --text: #0e1a2b;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+    }
+    @media (prefers-color-scheme: dark){
+      :root{ --text:#e5e7eb; --muted:#9ca3af; --border:#262b36; }
+    }
+    html,body{ margin:0; padding:0; background:var(--bg); color:var(--text); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", Arial; }
+    .wrap{ padding:8px; }
+    textarea{
+      width:100%;
+      border:1px solid var(--border);
+      border-radius:8px;
+      padding:8px 10px;
+      background:transparent;
+      color:var(--text);
+      font-size:14px;
+      line-height:1.6;
+      resize: none; /* 手動リサイズは無効 */
+      overflow:hidden; /* 自動伸縮時にスクロールバーを隠す */
+      outline: none;
+    }
+    .meta{ display:flex; justify-content:flex-end; padding-top:6px; font-variant-numeric: tabular-nums; }
+    .count{ font-size:12px; color:var(--muted); }
+    .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <label class="sr-only" for="input">テキスト入力</label>
+    <textarea id="input" rows="2" placeholder="ここに入力…"></textarea>
+    <div class="meta" aria-live="polite" aria-atomic="true">
+      <span class="count">文字数 <strong id="charCount">0</strong></span>
+    </div>
+  </div>
+
+  <script>
+    // 文字数: グラフェム単位（対応ブラウザ）。空白・改行も1文字としてカウント。
+    function countGraphemes(str){
+      if (window.Intl && 'Segmenter' in Intl){
+        const seg = new Intl.Segmenter('ja', {granularity:'grapheme'});
+        let n = 0; for (const _ of seg.segment(str)) n++; return n;
+      }
+      return Array.from(str).length; // フォールバック
+    }
+
+    const $input = document.getElementById('input');
+    const $char = document.getElementById('charCount');
+
+    // 2行分の最小高さを計算し、見た目ライン数に応じてオートリサイズ
+    let baseHeight = null;
+    function computeBaseHeight(){
+      const cs = getComputedStyle($input);
+      const lh = parseFloat(cs.lineHeight);
+      const pt = parseFloat(cs.paddingTop);
+      const pb = parseFloat(cs.paddingBottom);
+      const bt = parseFloat(cs.borderTopWidth);
+      const bb = parseFloat(cs.borderBottomWidth);
+      baseHeight = Math.round(lh * 2 + pt + pb + bt + bb);
+      $input.style.height = baseHeight + 'px';
+    }
+
+    function autoGrow(){
+      if (baseHeight == null) computeBaseHeight();
+      // いったん縮めてから scrollHeight を測る
+      $input.style.height = baseHeight + 'px';
+      const next = Math.max(baseHeight, $input.scrollHeight);
+      $input.style.height = next + 'px';
+    }
+
+    function update(){
+      const text = $input.value || '';
+      // 文字数
+      $char.textContent = countGraphemes(text);
+      // 高さ自動調整（視覚上の行数に応じて拡張。2行未満にはならない）
+      autoGrow();
+    }
+
+    // 正しく改行を扱うためのユーティリティ（必要なら使用）
+    function lineCountByNewline(str){
+      return str.length === 0 ? 1 : str.split(/
+/).length; // 
+ の正規表現はエスケープ必須
+    }
+
+    // 入力イベント
+    ['input','change','keyup','paste','cut'].forEach(ev => $input.addEventListener(ev, update));
+    window.addEventListener('load', () => { computeBaseHeight(); update(); });
+    window.addEventListener('resize', () => { computeBaseHeight(); update(); });
+  </script>
+</body>
+</html>
