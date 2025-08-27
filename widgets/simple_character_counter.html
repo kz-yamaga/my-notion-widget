@@ -6,22 +6,29 @@
   <title>Char Counter Mini</title>
   <style>
     :root{
-      --bg: transparent; /* Notion埋め込みで自然になじむ */
+      --bg: #ffffff;
       --text: #0e1a2b;
       --muted: #6b7280;
       --border: #e5e7eb;
+      --input-bg: #ffffff;
     }
     @media (prefers-color-scheme: dark){
-      :root{ --text:#e5e7eb; --muted:#9ca3af; --border:#262b36; }
+      :root{ 
+        --bg: #1a1a1a;
+        --text: #e5e7eb; 
+        --muted: #9ca3af; 
+        --border: #262b36;
+        --input-bg: #262b36;
+      }
     }
     html,body{ margin:0; padding:0; background:var(--bg); color:var(--text); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", Arial; }
-    .wrap{ padding:8px; }
+    .wrap{ padding:8px; width:90%; max-width:800px; margin:0 auto; }
     textarea{
       width:100%;
       border:1px solid var(--border);
       border-radius:8px;
       padding:8px 10px;
-      background:transparent;
+      background:var(--input-bg);
       color:var(--text);
       font-size:14px;
       line-height:1.6;
